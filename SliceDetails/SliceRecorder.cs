@@ -98,17 +98,17 @@ namespace SliceDetails
 						noteSwingInfo.score = new Score(preSwing, postSwing, offset);
 						_noteInfos.Add(noteSwingInfo);
 						break;
-					case NoteData.ScoringType.SliderHead:
+					case NoteData.ScoringType.ArcHead:
 						if (!Plugin.Settings.CountArcs) break;
 						noteSwingInfo.score = new Score(preSwing, null, offset);
 						_noteInfos.Add(noteSwingInfo);
 						break;
-					case NoteData.ScoringType.SliderTail:
+					case NoteData.ScoringType.ArcTail:
 						if (!Plugin.Settings.CountArcs) break;
 						noteSwingInfo.score = new Score(null, postSwing, offset);
 						_noteInfos.Add(noteSwingInfo);
 						break;
-					case NoteData.ScoringType.BurstSliderHead:
+					case NoteData.ScoringType.ChainHead:
 						if (!Plugin.Settings.CountChains) break;
 						noteSwingInfo.score = new Score(preSwing, null, offset);
 						_noteInfos.Add(noteSwingInfo);

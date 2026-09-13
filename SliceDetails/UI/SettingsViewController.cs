@@ -1,5 +1,7 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 
+using BeatSaberMarkupLanguage.Util;
+
 namespace SliceDetails.UI
 {
 	internal class SettingsViewController : PersistentSingleton<SettingsViewController>

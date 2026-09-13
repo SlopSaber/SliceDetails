@@ -12,7 +12,7 @@ namespace SliceDetails.AffinityPatches
 		}
 
 		[AffinityPostfix]
-		[AffinityPatch(typeof(MenuTransitionsHelper), nameof(MenuTransitionsHelper.HandleMainGameSceneDidFinish))]
+		[AffinityPatch(typeof(MenuTransitionsHelper), "HandleMainGameSceneDidFinish")]
 		internal void Postfix(ref MenuTransitionsHelper __instance) {
 			if (Plugin.Settings.ShowInPauseMenu)
 				_pauseUIController.CleanUp();

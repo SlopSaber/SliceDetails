@@ -124,7 +124,6 @@ namespace SliceDetails.UI
 
 			// Set tile click events and data
 			for (int i = 0; i < _tiles.Count; i++) {
-				_tiles[i].OnClickEvent = _tile.OnClickEvent;
 				_tiles[i].OnClickEvent += SetNotesData;
 				_tiles[i].DefaultColor = _tile.DefaultColor;
 				_tiles[i].HighlightColor = _tile.HighlightColor;
@@ -203,7 +202,7 @@ namespace SliceDetails.UI
 		[UIAction("#presentNotesModal")]
 		public void PresentModal() {
 			if (_basicUIAudioManager != null)
-				_basicUIAudioManager.HandleButtonClickEvent();
+				_basicUIAudioManager.GetType().GetMethod("HandleButtonClickEvent", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)?.Invoke(_basicUIAudioManager, null);
 		}
 
 		public void CloseModal(bool animated) {
