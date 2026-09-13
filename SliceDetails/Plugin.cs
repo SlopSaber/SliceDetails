@@ -1,11 +1,9 @@
-﻿using IPA;
+using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using SiraUtil.Zenject;
 using SliceDetails.Installers;
 using SliceDetails.Settings;
-using BeatSaberMarkupLanguage.Settings;
-using SliceDetails.UI;
 
 namespace SliceDetails
 {
@@ -18,8 +16,6 @@ namespace SliceDetails
 		[Init]
 		public void Init(IPA.Logging.Logger logger, Config config, Zenjector zenject) {
 			Settings = config.Generated<SettingsStore>();
-
-			BSMLSettings.Instance.AddSettingsMenu("SliceDetails", $"SliceDetails.UI.Views.settingsView.bsml", SettingsViewController.instance);
 
 			zenject.UseLogger(logger);
 
