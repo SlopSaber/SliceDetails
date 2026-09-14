@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
@@ -155,16 +154,20 @@ namespace SliceDetails.UI
 			_selectedTileIndicator.transform.SetParent(_noteModal.transform, false);
 			_selectedTileIndicator.transform.localPosition = new Vector3(0f, 30f, 0f);
 
-			_basicUIAudioManager = Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault(x =>
+			foreach (BasicUIAudioManager audioManager in Resources.FindObjectsOfTypeAll<BasicUIAudioManager>())
 			{
-				if (x == null)
+				if (audioManager == null || audioManager.gameObject == null)
 				{
-					return false;
+					continue;
 				}
 
-				var audioSource = x.GetComponent<AudioSource>();
-				return audioSource != null && audioSource.enabled && x.isActiveAndEnabled;
-			});
+				var audioSource = audioManager.GetComponent<AudioSource>();
+				if (audioSource != null && audioSource.enabled && audioManager.gameObject.activeInHierarchy)
+				{
+					_basicUIAudioManager = audioManager;
+					break;
+				}
+			}
 
 			DestroyImmediate(_note.gameObject);
 			DestroyImmediate(_noteRow);
@@ -173,13 +176,19 @@ namespace SliceDetails.UI
 		}
 
 		public void SetTileScores() {
-			if (_sliceProcessor?.tiles == null)
+			Tile[] tiles = _sliceProcessor?.tiles;
+			if (tiles == null || _tiles == null)
 			{
 				return;
 			}
 
-			int tileCount = Math.Min(_tiles.Count, _sliceProcessor.tiles.Length);
+			int tileCount = Math.Min(_tiles.Count, tiles.Length);
 			for (int i = 0; i < tileCount; i++) {
+				if (_tiles[i] == null || _tiles[i].gameObject == null || tiles[i] == null)
+				{
+					continue;
+				}
+
 				FormattableText[] texts = _tiles[i].transform.GetComponentsInChildren<FormattableText>(true);
 				if (texts.Length == 0)
 				{
@@ -200,11 +209,11 @@ namespace SliceDetails.UI
 					}
 				}
 
-				if (_sliceProcessor.tiles[i].atLeastOneNote) { 
-					scoreText.text = String.Format("{0:0.00}", _sliceProcessor.tiles[i].scoreAverage);
+				if (tiles[i].atLeastOneNote) {
+					scoreText.text = String.Format("{0:0.00}", tiles[i].scoreAverage);
 					if (countText != null)
 					{
-						countText.text = _sliceProcessor.tiles[i].noteCount.ToString();
+						countText.text = tiles[i].noteCount.ToString();
 					}
 				} else { 
 					scoreText.text = "";
