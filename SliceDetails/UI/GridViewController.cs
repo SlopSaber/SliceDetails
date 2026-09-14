@@ -155,7 +155,16 @@ namespace SliceDetails.UI
 			_selectedTileIndicator.transform.SetParent(_noteModal.transform, false);
 			_selectedTileIndicator.transform.localPosition = new Vector3(0f, 30f, 0f);
 
-			_basicUIAudioManager = Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().First(x => x.GetComponent<AudioSource>().enabled && x.isActiveAndEnabled);
+			_basicUIAudioManager = Resources.FindObjectsOfTypeAll<BasicUIAudioManager>().FirstOrDefault(x =>
+			{
+				if (x == null)
+				{
+					return false;
+				}
+
+				var audioSource = x.GetComponent<AudioSource>();
+				return audioSource != null && audioSource.enabled && x.isActiveAndEnabled;
+			});
 
 			DestroyImmediate(_note.gameObject);
 			DestroyImmediate(_noteRow);
@@ -164,23 +173,45 @@ namespace SliceDetails.UI
 		}
 
 		public void SetTileScores() {
-			for (int i = 0; i < _tiles.Count; i++) {
-				FormattableText[] texts = _tiles[i].transform.GetComponentsInChildren<FormattableText>(true);
+			if (_sliceProcessor?.tiles == null)
+			{
+				return;
+			}
 
-				if(Plugin.Settings.ShowSliceCounts) {
-					texts[0].transform.localPosition = new Vector3(0.0f, 0.75f, 0.0f);
-					texts[1].transform.localPosition = new Vector3(0.0f, -1.5f, 0.0f);
-					texts[1].gameObject.SetActive(true);
+			int tileCount = Math.Min(_tiles.Count, _sliceProcessor.tiles.Length);
+			for (int i = 0; i < tileCount; i++) {
+				FormattableText[] texts = _tiles[i].transform.GetComponentsInChildren<FormattableText>(true);
+				if (texts.Length == 0)
+				{
+					continue;
+				}
+
+				FormattableText scoreText = texts[0];
+				FormattableText countText = texts.Length > 1 ? texts[1] : null;
+
+				if(Plugin.Settings.ShowSliceCounts && countText != null) {
+					scoreText.transform.localPosition = new Vector3(0.0f, 0.75f, 0.0f);
+					countText.transform.localPosition = new Vector3(0.0f, -1.5f, 0.0f);
+					countText.gameObject.SetActive(true);
 				} else {
-					texts[1].gameObject.SetActive(false);
+					if (countText != null)
+					{
+						countText.gameObject.SetActive(false);
+					}
 				}
 
 				if (_sliceProcessor.tiles[i].atLeastOneNote) { 
-					texts[0].text = String.Format("{0:0.00}", _sliceProcessor.tiles[i].scoreAverage);
-					texts[1].text = _sliceProcessor.tiles[i].noteCount.ToString();
+					scoreText.text = String.Format("{0:0.00}", _sliceProcessor.tiles[i].scoreAverage);
+					if (countText != null)
+					{
+						countText.text = _sliceProcessor.tiles[i].noteCount.ToString();
+					}
 				} else { 
-					texts[0].text = "";
-					texts[1].text = "";
+					scoreText.text = "";
+					if (countText != null)
+					{
+						countText.text = "";
+					}
 				}
 			}
 		}
@@ -206,7 +237,12 @@ namespace SliceDetails.UI
 		}
 
 		public void CloseModal(bool animated) {
-			_noteModal.GetComponent<ModalView>().Hide(animated);
+			if (_noteModal == null)
+			{
+				return;
+			}
+
+			_noteModal.GetComponent<ModalView>()?.Hide(animated);
 		}
 
 		public void UpdateUINotesHoverHintController() {
