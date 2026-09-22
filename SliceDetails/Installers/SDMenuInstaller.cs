@@ -21,17 +21,18 @@ namespace SliceDetails.Installers
 
 		private sealed class SettingsMenu : IInitializable, IDisposable {
 			private readonly BSMLSettings _bsmlSettings;
+			private readonly SettingsViewController _settingsViewController = new SettingsViewController();
 
 			public SettingsMenu(BSMLSettings bsmlSettings) {
 				_bsmlSettings = bsmlSettings;
 			}
 
 			public void Initialize() {
-				_bsmlSettings.AddSettingsMenu("SliceDetails", "SliceDetails.UI.Views.settingsView.bsml", SettingsViewController.instance);
+				_bsmlSettings.AddSettingsMenu("SliceDetails", "SliceDetails.UI.Views.settingsView.bsml", _settingsViewController);
 			}
 
 			public void Dispose() {
-				_bsmlSettings.RemoveSettingsMenu(SettingsViewController.instance);
+				_bsmlSettings.RemoveSettingsMenu(_settingsViewController);
 			}
 		}
 	}

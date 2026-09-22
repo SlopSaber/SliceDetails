@@ -1,10 +1,8 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 
-using BeatSaberMarkupLanguage.Util;
-
 namespace SliceDetails.UI
 {
-	internal class SettingsViewController : PersistentSingleton<SettingsViewController>
+	internal class SettingsViewController
 	{
 		[UIValue("show-pause")]
 		public bool ShowInPauseMenu {

@@ -101,7 +101,7 @@ namespace SliceDetails.UI
 			_hoverPanelTmpro.fontStyle = FontStyles.Normal;
 			_hoverPanelTmpro.alignment = TextAlignmentOptions.Left;
 			_hoverPanelTmpro.overflowMode = TextOverflowModes.Overflow;
-			_hoverPanelTmpro.enableWordWrapping = false;
+			_hoverPanelTmpro.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
 			ContentSizeFitter csf = _hoverPanelTmpro.gameObject.AddComponent<ContentSizeFitter>();
 			csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 		}

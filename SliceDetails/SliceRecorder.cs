@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 using SliceDetails.Data;
-using SiraUtil.Logging;
 
 namespace SliceDetails
 {
@@ -12,8 +11,6 @@ namespace SliceDetails
 		private readonly BeatmapObjectManager _beatmapObjectManager;
 		private readonly SliceProcessor _sliceProcessor;
 		private readonly ScoreController _scoreController;
-
-		[Inject] private SiraLog _siraLog;
 
 		private Dictionary<NoteData, NoteInfo> _noteSwingInfos = new Dictionary<NoteData, NoteInfo>();
 		private List<NoteInfo> _noteInfos = new List<NoteInfo>();

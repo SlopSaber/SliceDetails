@@ -40,33 +40,33 @@ namespace SliceDetails.UI
 		private DiContainer _diContainer;
 
 		[UIObject("tile-grid")]
-		private readonly GameObject _tileGrid;
+		private GameObject _tileGrid { get; set; }
 		[UIObject("tile-row")]
-		private readonly GameObject _tileRow;
+		private GameObject _tileRow { get; set; }
 		[UIComponent("tile")]
-		private readonly ClickableImage _tile;
+		private ClickableImage _tile { get; set; }
 
 		[UIObject("note-modal")]
-		private readonly GameObject _noteModal;
+		private GameObject _noteModal { get; set; }
 		[UIObject("note-horizontal")]
-		private readonly GameObject _noteHorizontal;
+		private GameObject _noteHorizontal { get; set; }
 		[UIObject("note-grid")]
-		private GameObject _noteGrid;
+		private GameObject _noteGrid { get; set; }
 		[UIObject("note-row")]
-		private GameObject _noteRow;
+		private GameObject _noteRow { get; set; }
 
 		[UIComponent("note")]
-		private readonly ImageView _note;
+		private ImageView _note { get; set; }
 		[UIComponent("note-dir-arrow")]
-		private readonly ImageView _noteDirArrow;
+		private ImageView _noteDirArrow { get; set; }
 		[UIComponent("note-cut-arrow")]
-		private readonly ImageView _noteCutArrow;
+		private ImageView _noteCutArrow { get; set; }
 		[UIComponent("note-cut-distance")]
-		private readonly ImageView _noteCutDistance;
+		private ImageView _noteCutDistance { get; set; }
 		[UIComponent("sd-version")]
-		private readonly TextMeshProUGUI _sdVersionText;
+		private TextMeshProUGUI _sdVersionText { get; set; }
 		[UIComponent("reset-button")]
-		private readonly RectTransform _resetButtonTransform;
+		private RectTransform _resetButtonTransform { get; set; }
 
 		private List<ClickableImage> _tiles = new List<ClickableImage>();
 		private List<NoteUI> _notes = new List<NoteUI>();
