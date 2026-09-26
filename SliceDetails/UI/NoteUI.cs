@@ -49,10 +49,7 @@ namespace SliceDetails.UI
 			_backgroundImage.color = _noteColor;
 			_cutDistanceImage.color = new Color(0.0f, 1.0f, 0.0f, 0.75f);
 
-			Texture2D square = new Texture2D(2, 2);
-			square.filterMode = FilterMode.Point;
-			square.Apply();
-			_cutDistanceImage.sprite = Sprite.Create(square, new Rect(0, 0, square.width, square.height), new Vector2(0, 0), 100);
+			_cutDistanceImage.sprite = assetLoader.spr_square;
 
 			_noteHoverHint = _backgroundImage.gameObject.AddComponent<HoverHint>();
 			_noteHoverHint.text = "";
@@ -93,7 +90,9 @@ namespace SliceDetails.UI
 		}
 
 		public void SetHoverHintController(HoverHintController hoverHintController) {
+			if (hoverHintController == null || (_hoverHintController == hoverHintController && _hoverPanelTmpro != null)) return;
 			_hoverHintController = hoverHintController;
+			_noteHoverHint.SetField("_hoverHintController", _hoverHintController);
 			HoverHintPanel hhp = _hoverHintController.GetField<HoverHintPanel, HoverHintController>("_hoverHintPanel");
 			// Skew cringe skew cringe
 			hhp.GetComponent<ImageView>().SetField("_skew", 0.0f);
@@ -102,14 +101,13 @@ namespace SliceDetails.UI
 			_hoverPanelTmpro.alignment = TextAlignmentOptions.Left;
 			_hoverPanelTmpro.overflowMode = TextOverflowModes.Overflow;
 			_hoverPanelTmpro.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
-			ContentSizeFitter csf = _hoverPanelTmpro.gameObject.AddComponent<ContentSizeFitter>();
+			ContentSizeFitter csf = _hoverPanelTmpro.GetComponent<ContentSizeFitter>();
+			if (csf == null) csf = _hoverPanelTmpro.gameObject.AddComponent<ContentSizeFitter>();
 			csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 		}
 
 		public void SetNoteData(float angle, float offset, Score score, int count) {
-			_noteHoverHint.SetField("_hoverHintController", _hoverHintController);
-
-			if (angle == 0f && offset == 0f) {
+			if (count == 0) {
 				_backgroundImage.color = Color.gray;
 				_cutArrowImage.gameObject.SetActive(false);
 				_cutDistanceImage.gameObject.SetActive(false);

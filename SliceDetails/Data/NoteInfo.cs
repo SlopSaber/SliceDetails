@@ -9,24 +9,22 @@ namespace SliceDetails.Data
 {
 	internal class NoteInfo
 	{
-		public NoteData noteData;
-		public NoteCutInfo cutInfo;
+		public NoteCutDirection cutDirection;
+		public ColorType colorType;
 		public float cutAngle;
 		public float cutOffset;
 		public Score score;
-		public Vector2 noteGridPosition;
 		public int noteIndex;
 
 		public NoteInfo() { 
 			
 		}
 
-		public NoteInfo(NoteData noteData, NoteCutInfo cutInfo, float cutAngle, float cutOffset, Vector2 noteGridPosition, int noteIndex) {
-			this.noteData = noteData;
-			this.cutInfo = cutInfo;
+		public NoteInfo(NoteData noteData, float cutAngle, float cutOffset, int noteIndex) {
+			cutDirection = noteData.cutDirection;
+			colorType = noteData.colorType;
 			this.cutAngle = cutAngle;
 			this.cutOffset = cutOffset;
-			this.noteGridPosition = noteGridPosition;
 			this.noteIndex = noteIndex;
 		}
 	}

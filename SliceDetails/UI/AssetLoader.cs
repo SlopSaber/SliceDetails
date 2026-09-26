@@ -9,11 +9,15 @@ namespace SliceDetails.UI
 		public Sprite spr_arrow { get; }
 		public Sprite spr_dot { get; }
 		public Sprite spr_roundrect { get; }
+		public Sprite spr_square { get; }
 
 		public AssetLoader() {
 			spr_arrow = LoadSpriteFromResource("SliceDetails.Resources.arrow.png");
 			spr_dot = LoadSpriteFromResource("SliceDetails.Resources.dot.png");
 			spr_roundrect = LoadSpriteFromResource("SliceDetails.Resources.bloq.png");
+			var square = new Texture2D(2, 2) { filterMode = FilterMode.Point };
+			square.Apply();
+			spr_square = Sprite.Create(square, new Rect(0, 0, square.width, square.height), Vector2.zero, 100);
 		}
 
 		public static Sprite LoadSpriteFromResource(string path) {
@@ -27,6 +31,7 @@ namespace SliceDetails.UI
 						Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0, 0), 100);
 						return sprite;
 					}
+					UnityEngine.Object.Destroy(tex);
 				}
 			}
 			return null;
