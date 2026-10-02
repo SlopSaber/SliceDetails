@@ -13,7 +13,7 @@ namespace SliceDetails
 		private readonly ScoreController _scoreController;
 
 		private Dictionary<NoteData, NoteInfo> _noteSwingInfos = new Dictionary<NoteData, NoteInfo>();
-		private List<NoteInfo> _noteInfos = new List<NoteInfo>();
+		private int _noteCount;
 		private int _lastProcessedCount = -1;
 
 		public SliceRecorder(BeatmapObjectManager beatmapObjectManager, ScoreController scoreController, SliceProcessor sliceProcessor) {
@@ -25,7 +25,7 @@ namespace SliceDetails
 		public void Initialize() {
 			_beatmapObjectManager.noteWasCutEvent += OnNoteWasCut;
 			_scoreController.scoringForNoteFinishedEvent += ScoringForNoteFinishedHandler;
-			_sliceProcessor.ResetProcessor();
+			_sliceProcessor.BeginRecording();
 		}
 
 		public void Dispose() {
@@ -34,20 +34,26 @@ namespace SliceDetails
 			// Process slices once the map ends
 			ProcessSlices();
 			_noteSwingInfos.Clear();
-			_noteInfos.Clear();
+			_noteCount = 0;
 		}
 
 		public void ClearSlices() {
-			_noteInfos.Clear();
+			_noteCount = 0;
+			_sliceProcessor.BeginRecording();
 			_noteSwingInfos.Clear();
 			_lastProcessedCount = -1;
 			ProcessSlices();
 		}
 
 		public void ProcessSlices() {
-			if (_sliceProcessor.ready && _lastProcessedCount == _noteInfos.Count) return;
-			_sliceProcessor.ProcessSlices(_noteInfos);
-			_lastProcessedCount = _noteInfos.Count;
+			if ((_sliceProcessor.ready || _sliceProcessor.processing) && _lastProcessedCount == _noteCount) return;
+			_sliceProcessor.ProcessSlices();
+			_lastProcessedCount = _noteCount;
+		}
+
+		private void RecordNote(NoteInfo note) {
+			_sliceProcessor.RecordNote(note);
+			++_noteCount;
 		}
 
 		private void OnNoteWasCut(NoteController noteController, in NoteCutInfo noteCutInfo) {
@@ -103,22 +109,22 @@ namespace SliceDetails
 				{
 					case NoteData.ScoringType.Normal:
 						noteSwingInfo.score = new Score(preSwing, postSwing, offset);
-						_noteInfos.Add(noteSwingInfo);
+						RecordNote(noteSwingInfo);
 						break;
 					case NoteData.ScoringType.ArcHead:
 						if (!Plugin.Settings.CountArcs) break;
 						noteSwingInfo.score = new Score(preSwing, null, offset);
-						_noteInfos.Add(noteSwingInfo);
+						RecordNote(noteSwingInfo);
 						break;
 					case NoteData.ScoringType.ArcTail:
 						if (!Plugin.Settings.CountArcs) break;
 						noteSwingInfo.score = new Score(null, postSwing, offset);
-						_noteInfos.Add(noteSwingInfo);
+						RecordNote(noteSwingInfo);
 						break;
 					case NoteData.ScoringType.ChainHead:
 						if (!Plugin.Settings.CountChains) break;
 						noteSwingInfo.score = new Score(preSwing, null, offset);
-						_noteInfos.Add(noteSwingInfo);
+						RecordNote(noteSwingInfo);
 						break;
 				}
 

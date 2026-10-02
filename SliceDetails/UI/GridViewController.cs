@@ -72,6 +72,8 @@ namespace SliceDetails.UI
 		private List<NoteUI> _notes = new List<NoteUI>();
 		private SelectedTileIndicator _selectedTileIndicator;
 		private BasicUIAudioManager _basicUIAudioManager;
+		private bool _refreshPending;
+		private int _refreshRevision;
 
 
 		[Inject]
@@ -181,6 +183,8 @@ namespace SliceDetails.UI
 			{
 				return;
 			}
+			_refreshRevision = _sliceProcessor.revision;
+			_refreshPending = !_sliceProcessor.ready && _sliceProcessor.processing;
 
 			int tileCount = Math.Min(_tiles.Count, tiles.Length);
 			for (int i = 0; i < tileCount; i++) {
@@ -209,7 +213,7 @@ namespace SliceDetails.UI
 					}
 				}
 
-				if (tiles[i].atLeastOneNote) {
+				if (_sliceProcessor.ready && tiles[i].atLeastOneNote) {
 					scoreText.text = String.Format("{0:0.00}", tiles[i].scoreAverage);
 					if (countText != null)
 					{
@@ -225,7 +229,26 @@ namespace SliceDetails.UI
 			}
 		}
 
+		private void Update() {
+			if (_sliceProcessor == null || _tiles.Count == 0)
+				return;
+			if (_refreshRevision != _sliceProcessor.revision) {
+				SetTileScores();
+				return;
+			}
+			if (!_refreshPending)
+				return;
+			if (_sliceProcessor.ready)
+				SetTileScores();
+			else if (!_sliceProcessor.processing)
+				_refreshPending = false;
+		}
+
 		private void SetNotesData(PointerEventData eventData) {
+			if (!_sliceProcessor.ready) {
+				CloseModal(false);
+				return;
+			}
 			int tileIndex = _tiles.IndexOf(eventData.pointerPress.GetComponent<ClickableImage>());
 			_selectedTileIndicator.SetSelectedTile(tileIndex);
 			Tile tile = _sliceProcessor.tiles[tileIndex];
@@ -241,6 +264,10 @@ namespace SliceDetails.UI
 
 		[UIAction("#presentNotesModal")]
 		public void PresentModal() {
+			if (!_sliceProcessor.ready) {
+				CloseModal(false);
+				return;
+			}
 			if (_basicUIAudioManager != null)
 				_basicUIAudioManager.GetType().GetMethod("HandleButtonClickEvent", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)?.Invoke(_basicUIAudioManager, null);
 		}
