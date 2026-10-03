@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
@@ -32,6 +34,7 @@ namespace SliceDetails.UI
 	[HotReload(RelativePathToLayout = @"Views\gridView.bsml")]
 	[ViewDefinition("SliceDetails.UI.Views.gridView.bsml")]
 	internal class GridViewController : BSMLAutomaticViewController {
+		private static readonly FieldInfo ContentsField = typeof(BSMLViewController).GetField("contentObject", BindingFlags.Instance | BindingFlags.NonPublic);
 
 		private SiraLog _siraLog;
 		private AssetLoader _assetLoader;
@@ -93,16 +96,45 @@ namespace SliceDetails.UI
 			int revision = ++_parseRevision;
 			_gridReady = false;
 			AssetLoader assetLoader = _assetLoader;
+			GameObject contents = (GameObject)ContentsField.GetValue(this);
+			GameObject tileGrid = _tileGrid;
+			ImageView note = _note;
 			try {
 				await assetLoader.Ready;
-				if (!this || revision != _parseRevision || assetLoader != _assetLoader || !assetLoader.IsReady || _tileGrid == null || _note == null)
+				if (!IsCurrentParse(revision, assetLoader, contents) || !assetLoader.IsReady || tileGrid == null || tileGrid != _tileGrid || note == null || note != _note)
 					return;
 				BuildGrid();
+				if (!IsCurrentParse(revision, assetLoader, contents))
+					return;
 				_gridReady = true;
 				SetTileScores();
 			} catch (Exception exception) {
-				if (this && revision == _parseRevision)
-					_siraLog.Error(exception);
+				if (IsCurrentParse(revision, assetLoader, contents))
+					ShowFallback(exception);
+			}
+		}
+
+		private bool IsCurrentParse(int revision, AssetLoader assetLoader, GameObject contents) {
+			return this && revision == _parseRevision && assetLoader == _assetLoader && contents != null && contents == (GameObject)ContentsField.GetValue(this);
+		}
+
+		private void ShowFallback(Exception exception) {
+			_gridReady = false;
+			++_parseRevision;
+			foreach (ClickableImage tile in _tiles) {
+				if (tile != null)
+					tile.OnClickEvent -= SetNotesData;
+			}
+			_tiles.Clear();
+			_notes.Clear();
+			_selectedTileIndicator = null;
+			_siraLog.Error(exception);
+			try {
+				ClearContents();
+				GameObject contents = (GameObject)ContentsField.GetValue(this);
+				BSMLParser.Instance.Parse(string.Format(FallbackContent, BeatSaberMarkupLanguage.Utilities.EscapeXml(exception.Message)), contents, this);
+			} catch (Exception fallbackException) {
+				_siraLog.Error(fallbackException);
 			}
 		}
 
