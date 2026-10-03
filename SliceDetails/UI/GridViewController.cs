@@ -79,6 +79,7 @@ namespace SliceDetails.UI
 		private int _refreshRevision;
 		private int _parseRevision;
 		private bool _gridReady;
+		private bool _parsingFallback;
 
 
 		[Inject]
@@ -93,6 +94,8 @@ namespace SliceDetails.UI
 
 		[UIAction("#post-parse")]
 		public async void PostParse() {
+			if (_parsingFallback)
+				return;
 			int revision = ++_parseRevision;
 			_gridReady = false;
 			AssetLoader assetLoader = _assetLoader;
@@ -129,12 +132,15 @@ namespace SliceDetails.UI
 			_notes.Clear();
 			_selectedTileIndicator = null;
 			_siraLog.Error(exception);
+			_parsingFallback = true;
 			try {
 				ClearContents();
 				GameObject contents = (GameObject)ContentsField.GetValue(this);
 				BSMLParser.Instance.Parse(string.Format(FallbackContent, BeatSaberMarkupLanguage.Utilities.EscapeXml(exception.Message)), contents, this);
 			} catch (Exception fallbackException) {
 				_siraLog.Error(fallbackException);
+			} finally {
+				_parsingFallback = false;
 			}
 		}
 
