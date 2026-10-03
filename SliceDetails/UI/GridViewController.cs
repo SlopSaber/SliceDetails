@@ -74,6 +74,8 @@ namespace SliceDetails.UI
 		private BasicUIAudioManager _basicUIAudioManager;
 		private bool _refreshPending;
 		private int _refreshRevision;
+		private int _parseRevision;
+		private bool _gridReady;
 
 
 		[Inject]
@@ -87,7 +89,24 @@ namespace SliceDetails.UI
 		}
 
 		[UIAction("#post-parse")]
-		public void PostParse() {
+		public async void PostParse() {
+			int revision = ++_parseRevision;
+			_gridReady = false;
+			AssetLoader assetLoader = _assetLoader;
+			try {
+				await assetLoader.Ready;
+				if (!this || revision != _parseRevision || assetLoader != _assetLoader || !assetLoader.IsReady || _tileGrid == null || _note == null)
+					return;
+				BuildGrid();
+				_gridReady = true;
+				SetTileScores();
+			} catch (Exception exception) {
+				if (this && revision == _parseRevision)
+					_siraLog.Error(exception);
+			}
+		}
+
+		private void BuildGrid() {
 			_noteDirArrow.gameObject.name = "NoteDirArrow";
 			_noteCutArrow.gameObject.name = "NoteCutArrow";
 			_noteCutDistance.gameObject.name = "NoteCutDistance";
@@ -179,7 +198,7 @@ namespace SliceDetails.UI
 
 		public void SetTileScores() {
 			Tile[] tiles = _sliceProcessor?.tiles;
-			if (tiles == null || _tiles == null)
+			if (!_gridReady || tiles == null || _tiles == null)
 			{
 				return;
 			}
@@ -230,7 +249,7 @@ namespace SliceDetails.UI
 		}
 
 		private void Update() {
-			if (_sliceProcessor == null || _tiles.Count == 0)
+			if (!_gridReady || _sliceProcessor == null || _tiles.Count == 0)
 				return;
 			if (_refreshRevision != _sliceProcessor.revision) {
 				SetTileScores();
@@ -245,11 +264,13 @@ namespace SliceDetails.UI
 		}
 
 		private void SetNotesData(PointerEventData eventData) {
-			if (!_sliceProcessor.ready) {
+			if (!_gridReady || !_sliceProcessor.ready) {
 				CloseModal(false);
 				return;
 			}
 			int tileIndex = _tiles.IndexOf(eventData.pointerPress.GetComponent<ClickableImage>());
+			if (tileIndex < 0 || tileIndex >= _sliceProcessor.tiles.Length || _selectedTileIndicator == null)
+				return;
 			_selectedTileIndicator.SetSelectedTile(tileIndex);
 			Tile tile = _sliceProcessor.tiles[tileIndex];
 			for (int i = 0; i < _notes.Count; i++) {
@@ -264,7 +285,7 @@ namespace SliceDetails.UI
 
 		[UIAction("#presentNotesModal")]
 		public void PresentModal() {
-			if (!_sliceProcessor.ready) {
+			if (!_gridReady || !_sliceProcessor.ready) {
 				CloseModal(false);
 				return;
 			}
